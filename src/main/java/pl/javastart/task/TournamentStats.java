@@ -18,7 +18,7 @@ public class TournamentStats {
     private static final int DESCENDING = 2;
 
     void run(Scanner scanner) {
-        ArrayList<Player> playersScore = getPlayersScore(scanner);
+        List<Player> playersScore = getPlayersScore(scanner);
         Comparator<Player> comparator = getPlayerComparator(scanner);
         sortData(playersScore, comparator);
         saveDataToFile(playersScore, "stats.csv");
@@ -51,8 +51,8 @@ public class TournamentStats {
         }
         return sortComparator1;
     }
-    
-    private void saveDataToFile(ArrayList<Player> playersScore, String fileName) {
+
+    private void saveDataToFile(List<Player> playersScore, String fileName) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             for (Player player : playersScore) {
                 writer.write(player.toCsv());
@@ -65,7 +65,7 @@ public class TournamentStats {
 
     }
 
-    private void sortData(ArrayList<Player> playersScore, Comparator<Player> comparator) {
+    private void sortData(List<Player> playersScore, Comparator<Player> comparator) {
         Collections.sort(playersScore, comparator);
     }
 
@@ -73,7 +73,7 @@ public class TournamentStats {
         Comparator<Player> comparatotor = null;
         System.out.printf("Po jakim parametrze posortować? (%s - %s, %s - %s, %s - %s)\n",
                 SORT_FIRSTNAME, FIRSTNAME, SORT_LASTNAME, LASTNAME, SORT_SCORE, SCORE);
-        int option = inputInteger(scanner);
+        int option = inputIntegerForChooseComparator(scanner);
         switch (option) {
             case SORT_FIRSTNAME:
                 comparatotor = new NameComparator();
@@ -85,14 +85,31 @@ public class TournamentStats {
                 comparatotor = new ScoreComparator();
                 break;
             default:
-                System.out.println("błędne wybór spsoobu sortowania");
-                System.exit(0);
         }
         return comparatotor;
     }
 
-    private ArrayList<Player> getPlayersScore(Scanner scanner) {
-        ArrayList<Player> players = new ArrayList<>();
+    private int inputIntegerForChooseComparator(Scanner scanner) {
+        boolean valid = true;
+        int option = -1;
+        while (valid) {
+            try {
+                option = scanner.nextInt();
+                if (option == SORT_FIRSTNAME || option == SORT_LASTNAME || option == SORT_SCORE) {
+                    valid = false;
+                } else {
+                    System.out.println("błędne wybór spsoobu sortowania, Wprowadz parametr jeszcze raz, 1 , 2 badz 3");
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("błędne wybór spsoobu sortowania, Wprowadz parametr jeszcze raz, 1 , 2 badz 3");
+                scanner.nextLine();
+            }
+        }
+        return option;
+    }
+    
+    private List<Player> getPlayersScore(Scanner scanner) {
+        List<Player> players = new ArrayList<>();
         String sortOrder = "";
         do {
             System.out.println("Podaj wynik kolejnego gracza (lub stop):");
@@ -104,7 +121,7 @@ public class TournamentStats {
         return players;
     }
 
-    private static void splitingAndCreatingPlayer(ArrayList<Player> players, String sortOrder) {
+    private static void splitingAndCreatingPlayer(List<Player> players, String sortOrder) {
         try {
             String[] split = sortOrder.split(" ");
             players.add(new Player(split[0], split[1], Integer.parseInt(split[2])));
